@@ -1,3 +1,7 @@
+"""
+Implémentation de la méthode du tir.
+"""
+
 import numpy as np
 from scipy.optimize import brentq
 from scipy.integrate import odeint
@@ -73,9 +77,6 @@ def trouver_premieres_racines(func, val_0,  N, D=-0.01, rtol=0.1, max_iter=20, v
 
     return racines
     
-
-def normaliseur(valeurs):
-    return valeurs/np.sqrt(np.sum(np.square(valeurs)))
 
 if __name__ == "__main__":
     print("Running tests, I guess.")
