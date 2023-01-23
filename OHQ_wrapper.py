@@ -56,6 +56,6 @@ def faire_graphique(sol, scale, E_roundoff):
 
     plt.xlabel("x")
     plt.ylabel("$\psi_i + E_i$")
-    plt.legend()
+    plt.legend(loc="lower left")
 
     plt.show()
