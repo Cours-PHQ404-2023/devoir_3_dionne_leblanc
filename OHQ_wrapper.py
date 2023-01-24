@@ -1,3 +1,10 @@
+""" OHQ_wrapper.py
+
+Implémentation de deux fonctions appliquant la méthode des 
+éléments finis et la méthode du tir ainsi que deux fonctions 
+permettant de normaliser puis d'afficher les fonctions propres résultantes. 
+"""
+
 import numpy as np
 import mef
 import methode_tir
