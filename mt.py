@@ -11,7 +11,8 @@ from scipy.integrate import odeint
 
 
 def Schrodinger_RHS(vec, x, E):
-    """ Calcule le membre droit de l'équation de Schrodinger en fonction
+    """ Calcule le membre droit (au sens du format requis par les résolveurs 
+    d'équations différentielles) de l'équation de Schrodinger en fonction
     du vecteur d'état et de la position.
 
     Arguments
@@ -34,7 +35,7 @@ def Schrodinger_RHS(vec, x, E):
 
 def calcul_Schrodinger(vec_0, x_range, E):
     """ Calcule la solution à l'équation de Schrodinger 
-    étant donné les conditions intiales pour une énergie 
+    étant donné les conditions initiales pour une énergie 
     spécifiée sur une grille finie.
     
     Arguments
@@ -70,7 +71,7 @@ def generateur_cadre(func, val_0, D=-0.1, rtol=0.1, max_iter=20):
         Valeur initiale pour le cadre.
     D : float
         Incrément de progression de la deuxième borne.
-        Le signe affecte le déplacement de la borne.
+        (NOTE: Le signe affecte le déplacement de la borne.)
     rtol : float
         Tolérance relative dans la condition f(x_1) = -f(x_0)
     max_iter : int
@@ -91,9 +92,9 @@ def generateur_cadre(func, val_0, D=-0.1, rtol=0.1, max_iter=20):
         val_1 = val_0 + i*D # met à jour la valeur de val_1
         f_1 = func(val_1) # fonction évaluée à x_1
 
+        # retourne un cadre si la condition f(x_1) = -f(x_0) est respectée (dans l'intervalle de tolérance relative rtol)
         if np.isclose(-f_0, f_1, rtol=rtol): 
-            # retourne un cadre si la condition f(x_1) = -f(x_0) est respectée
-            return (val_0, val_1)
+            return (val_0, val_1) # retourne le cadre
 
     return None
 

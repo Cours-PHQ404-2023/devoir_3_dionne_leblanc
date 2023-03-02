@@ -7,14 +7,16 @@ permettant de normaliser puis d'afficher les fonctions propres résultantes.
 
 import numpy as np
 import mef
-import methode_tir
+import mt
 import scipy.sparse as sp
 import matplotlib.pyplot as plt
 
 
 def normaliseur(valeurs):
     """ Normalise une liste de valeurs au sens de la somme 
-    de sa valeur absolue au carré (\sum_i |f_i|^2 = 1)
+    de sa valeur absolue au carré (\sum_i |f_i|^2 = 1). Ce 
+    type de normalisation est fondamental en mécanique 
+    quantique.
 
     Arguments
     ---------
@@ -29,7 +31,7 @@ def normaliseur(valeurs):
     return valeurs/np.sqrt(np.sum(np.square(valeurs)))
 
 
-def solutions_mef(L, N_points, N_sols):
+def solutions_mef(L, N_points, N_solutions):
     """Fonction qui génère les premières solutions à l'équation 
     de Schrodinger pour l'oscillateur harmonique quantique sur 
     une grille unidimensionnelle centrée en 0 grâce à la méthode 
@@ -41,7 +43,7 @@ def solutions_mef(L, N_points, N_sols):
         La demie longueur du système borné en [-L,L].
     N_points : int
         Le nombre de points composant la grille bornée en [-L,L].
-    N_sols : int
+    N_solutions : int
         Le nombre de premiers états liés à retourner. 
 
     Retour
@@ -50,7 +52,7 @@ def solutions_mef(L, N_points, N_sols):
         Les N premières énergies des états liés.
     list(float)
         La grille spatiale utilisée pour la résolution.
-    array(float, ndim=2, shape=(N_points, N_sols))
+    array(float, ndim=2, shape=(N_points, N_solutions))
         Les N premiers états propres du système. 
         Un état correspond à une colonne du tableau.
     """
@@ -66,10 +68,11 @@ def solutions_mef(L, N_points, N_sols):
 
     L_C = (potentiel - laplacien)/2 # Opérateur différentiel (x^2 - d_x^2)/2 
     
-    # Calcul des valeurs/vecteur propres
-    eigvals, eigvecs = sp.linalg.eigsh(L_C, M=matrice_masse, which="SM", k=N_sols)
+    # Calcul des `N_solutions` premiers vecteurs/valeurs propres
+    eigvals, eigvecs = sp.linalg.eigsh(L_C, M=matrice_masse, which="SM", k=N_solutions)
 
-    eigvecs_repr_pos = np.empty_like(eigvecs)
+    
+    eigvecs_repr_pos = np.empty_like(eigvecs) # initialisation du tableau de fonctions propres
     for i in range(len(eigvals)):
         # transformation des vect. propres dans la repr. pos. et normalisation
         eigvecs_repr_pos[:,i] = normaliseur(matrice_masse_inv.dot(eigvecs[:,i]))
@@ -77,7 +80,7 @@ def solutions_mef(L, N_points, N_sols):
     return eigvals, x_grid[1:-1], eigvecs_repr_pos
 
 
-def solutions_mt(L, N_points, N_sols, vec_0=[0,0.001], val_0=0.2, D=-0.01, rtol_cadrage=0.1, max_iter_cadrage=20, val_max=10):
+def solutions_mt(L, N_points, N_solutions, vec_0=[0,0.001], val_0=0.2, D=-0.01, rtol_cadrage=0.1, max_iter_cadrage=20, val_max=10):
     """Fonction qui génère les premières solutions à l'équation 
     de Schrodinger pour l'oscillateur harmonique quantique sur 
     une grille unidimensionnelle centrée en 0 grâce à la méthode 
@@ -89,7 +92,7 @@ def solutions_mt(L, N_points, N_sols, vec_0=[0,0.001], val_0=0.2, D=-0.01, rtol_
         La demie longueur du système borné en [-L,L].
     N_points : int
         Le nombre de points composant la grille bornée en [-L,L].
-    N_sols : int
+    N_solutions : int
         Le nombre de premiers états liés à retourner. 
     vec_0 : list(float)
         Les conditions initiales de la fonction d'onde à x=-L 
@@ -114,20 +117,20 @@ def solutions_mt(L, N_points, N_sols, vec_0=[0,0.001], val_0=0.2, D=-0.01, rtol_
         Les N premières énergies des états liés.
     list(float)
         La grille spatiale utilisée pour la résolution.
-    array(float, ndim=2, shape=(N_points, N_sols))
+    array(float, ndim=2, shape=(N_points, N_solutions))
         Les N premiers états propres du système. 
         Un état correspond à une colonne du tableau.
     """
     x_grid = np.linspace(-L, L, N_points) # génération de la grille
     
     # définition d'une fonction retournant psi(L) en fonction de l'énergie
-    BC_de_E = lambda E : methode_tir.calcul_Schrodinger(vec_0, x_grid, E)[-1,0]
+    BC_de_E = lambda E : mt.calcul_Schrodinger(vec_0, x_grid, E)[-1,0]
     
     # Trouver les premières racines
-    racines = methode_tir.trouver_premieres_racines(
+    racines = mt.trouver_premieres_racines(
         BC_de_E, 
         val_0, 
-        N_sols, 
+        N_solutions, 
         D=D, 
         rtol=rtol_cadrage, 
         max_iter=max_iter_cadrage, 
@@ -139,12 +142,12 @@ def solutions_mt(L, N_points, N_sols, vec_0=[0,0.001], val_0=0.2, D=-0.01, rtol_
 
     for i in range(len(racines)):
         # normalisation des fonctions et mise en forme
-        fonctions_propres[:,i] = normaliseur(methode_tir.calcul_Schrodinger(vec_0, x_grid, racines[i])[:,0])
+        fonctions_propres[:,i] = normaliseur(mt.calcul_Schrodinger(vec_0, x_grid, racines[i])[:,0])
 
     return racines, x_grid, fonctions_propres
         
 
-def faire_graphique(sol, scale, E_roundoff):
+def faire_graphique(sol, scale, E_roundoff, titre=None):
     """ Permet de faire un graphique des états propres 
     à partir du retour des fonctions solutions_mt() et 
     solutions_mef().
@@ -161,6 +164,8 @@ def faire_graphique(sol, scale, E_roundoff):
     E_roundoff : int
         Le nombre de décimales à garder dans l'affichage de 
         l'énergie.
+    titre : string (or None)
+        Le titre a donner au graphique (si pas `None`).
 
     Retour
     ------
@@ -176,5 +181,9 @@ def faire_graphique(sol, scale, E_roundoff):
     plt.xlabel("x")
     plt.ylabel("$\psi_i + E_i$")
     plt.legend(loc="lower left")
+
+    # rajout d'un titre au besoin
+    if titre != None:
+        plt.title(titre, wrap=True)
 
     plt.show() # montrer la figure
