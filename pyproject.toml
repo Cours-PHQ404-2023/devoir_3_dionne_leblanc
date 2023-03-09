@@ -1,16 +1,16 @@
 [tool.poetry]
 name = "td-jl-dev3-phq404"
 version = "0.1.0"
-description = "Troisième devoir de PHQ404"
-authors = ["Your Name <you@example.com>"]
+description = ""
+authors = ["Theo N. Dionne <theo.nathaniel.dionne@usherbrooke.ca>"]
 readme = "README.md"
 packages = [{include = "td_jl_dev3_phq404"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
-numpy = "^1.24.1"
-scipy = "^1.10.0"
-matplotlib = "^3.6.3"
+python = ">=3.9,<3.12"
+scipy = "^1.10.1"
+numpy = "^1.22"
+matplotlib = "^3.7.1"
 
 
 [build-system]
