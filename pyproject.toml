@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = ["Theo N. Dionne <theo.nathaniel.dionne@usherbrooke.ca>"]
 readme = "README.md"
-packages = [{include = "td_jl_dev3_phq404"}]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
